@@ -1,5 +1,6 @@
 # Practical-work1
-```
+
+```Java
 package ua.opnu;
 
 import javax.swing.*;
