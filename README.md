@@ -1,6 +1,23 @@
-# Practical-work1
+# Practical-work1 — Система управління бібліотекою
 
-```Java
+Настільний Java-додаток (Swing) для обліку, пошуку, фільтрації та оренди бібліотечних матеріалів (книг, журналів, DVD).
+
+## Як запустити проєкт локально
+1. Переконайтеся, що встановлено JDK 11 або новіше (`java -version`).
+2. Скомпілюйте файл `src/ua/opnu/LibraryManagementApp.java`:
+   ```bash
+   javac -encoding UTF-8 -d out src/ua/opnu/LibraryManagementApp.java
+   ```
+3. Запустіть програму:
+   ```bash
+   java -cp out ua.opnu.LibraryManagementApp
+   ```
+
+---
+
+## Вихідний код (`src/ua/opnu/LibraryManagementApp.java`)
+
+```java
 package ua.opnu;
 
 import javax.swing.*;
@@ -12,38 +29,22 @@ import java.util.List;
 
 // ============== ІНТЕРФЕЙСИ ==============
 
-// TODO 1: Створіть інтерфейс Searchable
-// Цей інтерфейс повинен мати один метод:
-// - boolean matches(String query) - перевіряє, чи відповідає елемент пошуковому запиту
 interface Searchable {
     boolean matches(String query);
 }
 
-// TODO 2: Створіть інтерфейс Rentable
-// Цей інтерфейс описує можливість орендувати елемент
-// Повинен містити три методи:
-// - boolean rent(String userName) - орендує елемент для користувача, повертає true якщо успішно
-// - boolean returnItem() - повертає елемент з оренди, повертає true якщо успішно
-// - boolean isAvailable() - повертає true, якщо елемент доступний для оренди
 interface Rentable {
     boolean rent(String userName);
     boolean returnItem();
     boolean isAvailable();
 }
 
-// TODO 3: Створіть інтерфейс Displayable
-// Цей інтерфейс описує можливість відображення елемента в таблиці
-// Повинен містити один метод:
-// - String[] toTableRow() - повертає масив рядків для відображення в таблиці
 interface Displayable {
     String[] toTableRow();
 }
 
 // ============== БАЗОВІ КЛАСИ ==============
-// TODO 4: Зробіть клас LibraryItem абстрактним
-// Додайте слово "abstract" перед "class"
-// Реалізуйте три інтерфейси: Searchable, Rentable, Displayable
-// Приклад: abstract class LibraryItem implements Searchable, Rentable, Displayable
+
 abstract class LibraryItem implements Searchable, Rentable, Displayable {
     protected String id;           // Унікальний ідентифікатор
     protected String title;        // Назва елемента
@@ -59,13 +60,6 @@ abstract class LibraryItem implements Searchable, Rentable, Displayable {
         this.available = true;
     }
 
-    // TODO 5: Реалізуйте метод rent() з інтерфейсу Rentable
-    // Алгоритм:
-    // 1. Перевірити, чи available == true (якщо false, повернути false)
-    // 2. Встановити available = false
-    // 3. Зберегти userName в поле rentedBy
-    // 4. Зберегти поточну дату в rentDate (використайте LocalDate.now())
-    // 5. Повернути true
     public boolean rent(String userName) {
         if (!available) {
             return false;
@@ -75,13 +69,7 @@ abstract class LibraryItem implements Searchable, Rentable, Displayable {
         rentDate = LocalDate.now();
         return true;
     }
-    // TODO 6: Реалізуйте метод returnItem() з інтерфейсу Rentable
-    // Алгоритм:
-    // 1. Перевірити, чи available == false (якщо true, повернути false - нічого повертати)
-    // 2. Встановити available = true
-    // 3. Очистити rentedBy (встановити null)
-    // 4. Очистити rentDate (встановити null)
-    // 5. Повернути true
+
     public boolean returnItem() {
         if (available) {
             return false;
@@ -92,61 +80,26 @@ abstract class LibraryItem implements Searchable, Rentable, Displayable {
         return true;
     }
 
-    // TODO 7: Реалізуйте метод isAvailable() з інтерфейсу Rentable
-    // Просто поверніть значення поля available
     public boolean isAvailable() {
         return available;
     }
-    // TODO 8: Реалізуйте метод matches() з інтерфейсу Searchable
-    // Алгоритм:
-    // 1. Перетворити query в нижній регістр: String lowerQuery = query.toLowerCase()
-    // 2. Перевірити, чи містить id (в нижньому регістрі) підрядок lowerQuery
-    // 3. АБО перевірити, чи містить title (в нижньому регістрі) підрядок lowerQuery
-    // 4. Повернути результат перевірки
-    // Підказка: використайте метод .toLowerCase() та .contains()
+
     public boolean matches(String query) {
+        if (query == null) {
+            return false;
+        }
         String lowerQuery = query.toLowerCase();
-        return id.toLowerCase().contains(lowerQuery) ||
-                title.toLowerCase().contains(lowerQuery);
+        return (id != null && id.toLowerCase().contains(lowerQuery)) ||
+                (title != null && title.toLowerCase().contains(lowerQuery));
     }
 
-    // TODO 9: Створіть абстрактний метод getType()
-    // Цей метод повинен повертати String (тип елемента: "Книга", "Журнал", "DVD")
-    // Синтаксис: public abstract String getType();
     public abstract String getType();
 
-    // Getters (не змінюйте)
     public String getId() { return id; }
     public String getTitle() { return title; }
     public int getYear() { return year; }
     public String getRentedBy() { return rentedBy; }
 }
-
-// TODO 10: Створіть клас Book, який успадковує LibraryItem
-// Додаткові поля:
-// - private String author (автор книги)
-// - private int pages (кількість сторінок)
-//
-// Що потрібно реалізувати:
-// 1. Конструктор: public Book(String id, String title, int year, String author, int pages)
-//    - Викличте конструктор батьківського класу: super(id, title, year)
-//    - Ініціалізуйте поля author та pages
-//
-// 2. Метод getType() - поверніть рядок "Книга"
-//
-// 3. Метод toTableRow() - поверніть масив String[] з 7 елементів:
-//    [0] - id
-//    [1] - getType()
-//    [2] - title
-//    [3] - year (перетворений в String)
-//    [4] - "Автор: " + author + ", Сторінок: " + pages
-//    [5] - available ? "Доступна" : "Орендована"
-//    [6] - rentedBy != null ? rentedBy : "-"
-//
-// 4. Перевизначте метод matches() - викличте super.matches(query) і додайте перевірку author
-//    Приклад: return super.matches(query) || author.toLowerCase().contains(query.toLowerCase());
-//
-// 5. Додайте getters: getAuthor() та getPages()
 
 class Book extends LibraryItem {
     private String author;
@@ -176,26 +129,16 @@ class Book extends LibraryItem {
 
     @Override
     public boolean matches(String query) {
+        if (query == null) {
+            return false;
+        }
         String lowerQuery = query.toLowerCase();
-        return super.matches(query) || author.toLowerCase().contains(lowerQuery);
+        return super.matches(query) || (author != null && author.toLowerCase().contains(lowerQuery));
     }
 
     public String getAuthor() { return author; }
     public int getPages() { return pages; }
 }
-
-// TODO 11: Створіть клас Magazine, який успадковує LibraryItem
-// Додаткові поля:
-// - private int issueNumber (номер випуску)
-// - private String publisher (видавець)
-//
-// Що потрібно реалізувати (аналогічно Book):
-// 1. Конструктор: public Magazine(String id, String title, int year, int issueNumber, String publisher)
-// 2. Метод getType() - поверніть "Журнал"
-// 3. Метод toTableRow() - в полі [4] поверніть "Випуск: " + issueNumber + ", Видавець: " + publisher
-//    В полі [5] використайте "Доступний" : "Орендований"
-// 4. Перевизначте matches() - додайте перевірку publisher
-// 5. Додайте getters: getIssueNumber() та getPublisher()
 
 class Magazine extends LibraryItem {
     private int issueNumber;
@@ -225,27 +168,16 @@ class Magazine extends LibraryItem {
 
     @Override
     public boolean matches(String query) {
+        if (query == null) {
+            return false;
+        }
         String lowerQuery = query.toLowerCase();
-        return super.matches(query) || publisher.toLowerCase().contains(lowerQuery);
+        return super.matches(query) || (publisher != null && publisher.toLowerCase().contains(lowerQuery));
     }
 
     public int getIssueNumber() { return issueNumber; }
     public String getPublisher() { return publisher; }
 }
-
-
-// TODO 12: Створіть клас DVD, який успадковує LibraryItem
-// Додаткові поля:
-// - private String director (режисер)
-// - private int duration (тривалість в хвилинах)
-//
-// Що потрібно реалізувати (аналогічно Book):
-// 1. Конструктор: public DVD(String id, String title, int year, String director, int duration)
-// 2. Метод getType() - поверніть "DVD"
-// 3. Метод toTableRow() - в полі [4] поверніть "Режисер: " + director + ", Тривалість: " + duration + " хв"
-//    В полі [5] використайте "Доступний" : "Орендований"
-// 4. Перевизначте matches() - додайте перевірку director
-// 5. Додайте getters: getDirector() та getDuration()
 
 class DVD extends LibraryItem {
     private String director;
@@ -275,55 +207,20 @@ class DVD extends LibraryItem {
 
     @Override
     public boolean matches(String query) {
+        if (query == null) {
+            return false;
+        }
         String lowerQuery = query.toLowerCase();
-        return super.matches(query) || director.toLowerCase().contains(lowerQuery);
+        return super.matches(query) || (director != null && director.toLowerCase().contains(lowerQuery));
     }
 
     public String getDirector() { return director; }
     public int getDuration() { return duration; }
 }
 
-
 // ============== GENERIC-КЛАСИ ==============
 
-// TODO 13: Створіть generic-клас Repository<T extends LibraryItem>
-// Цей клас буде зберігати колекцію елементів певного типу
-//
-// Поля:
-// - private List<T> items - список елементів (ініціалізуйте в конструкторі як new ArrayList<>())
-//
-// Методи, які потрібно реалізувати:
-//
-// 1. public void add(T item)
-//    Додає елемент до списку items
-//
-// 2. public boolean remove(String id)
-//    Видаляє елемент за id
-//    Алгоритм:
-//    - Пройдіть по всіх елементах items (використайте цикл for)
-//    - Якщо знайдено елемент з відповідним id, видаліть його (items.remove(i)) і поверніть true
-//    - Якщо не знайдено, поверніть false
-//
-// 3. public T findById(String id)
-//    Шукає елемент за id
-//    Алгоритм:
-//    - Пройдіть по всіх елементах items
-//    - Якщо знайдено елемент з відповідним id, поверніть його
-//    - Якщо не знайдено, поверніть null
-//
-// 4. public List<T> getAll()
-//    Повертає копію списку всіх елементів
-//    Поверніть: new ArrayList<>(items)
-//
-// 5. public List<T> search(String query)
-//    Шукає елементи, які відповідають запиту
-//    Алгоритм:
-//    - Створіть новий список результатів: List<T> results = new ArrayList<>();
-//    - Пройдіть по всіх елементах items
-//    - Якщо item.matches(query) == true, додайте item до results
-//    - Поверніть results
-
-class Repository<T extends LibraryItem> {
+class Repository<T LibraryItem extends> {
     private List<T> items;
 
     public Repository() {
@@ -368,47 +265,6 @@ class Repository<T extends LibraryItem> {
     }
 }
 
-// TODO 14: Створіть клас LibraryManager
-// Цей клас управляє всіма репозиторіями
-//
-// Поля:
-// - private Repository<Book> bookRepository
-// - private Repository<Magazine> magazineRepository
-// - private Repository<DVD> dvdRepository
-//
-// Методи, які потрібно реалізувати:
-//
-// 1. Конструктор LibraryManager()
-//    Ініціалізуйте всі три репозиторії (створіть нові об'єкти Repository)
-//
-// 2. public void addItem(LibraryItem item)
-//    Додає елемент до відповідного репозиторію (використовує поліморфізм)
-//    Алгоритм:
-//    - Якщо item instanceof Book, додайте до bookRepository (приведіть тип: (Book)item)
-//    - Інакше якщо item instanceof Magazine, додайте до magazineRepository
-//    - Інакше якщо item instanceof DVD, додайте до dvdRepository
-//
-// 3. public List<LibraryItem> getAllItems()
-//    Повертає всі елементи з усіх репозиторіїв
-//    Алгоритм:
-//    - Створіть новий список: List<LibraryItem> allItems = new ArrayList<>();
-//    - Додайте всі елементи з bookRepository.getAll() в allItems (використайте addAll)
-//    - Додайте всі елементи з magazineRepository.getAll() в allItems
-//    - Додайте всі елементи з dvdRepository.getAll() в allItems
-//    - Поверніть allItems
-//
-// 4. public List<LibraryItem> searchAll(String query)
-//    Шукає елементи у всіх репозиторіях
-//    Алгоритм аналогічний getAllItems(), але використовуйте search(query) замість getAll()
-//
-// 5. public LibraryItem findById(String id)
-//    Шукає елемент за id у всіх репозиторіях
-//    Алгоритм:
-//    - Спробуйте знайти в bookRepository.findById(id), якщо не null - поверніть
-//    - Спробуйте знайти в magazineRepository.findById(id), якщо не null - поверніть
-//    - Спробуйте знайти в dvdRepository.findById(id), якщо не null - поверніть
-//    - Якщо нічого не знайдено, поверніть null
-
 class LibraryManager {
     private Repository<Book> bookRepository;
     private Repository<Magazine> magazineRepository;
@@ -420,7 +276,10 @@ class LibraryManager {
         dvdRepository = new Repository<>();
     }
 
-    public void addItem(LibraryItem item) {
+    public boolean addItem(LibraryItem item) {
+        if (item == null || findById(item.getId()) != null) {
+            return false;
+        }
         if (item instanceof Book) {
             bookRepository.add((Book) item);
         } else if (item instanceof Magazine) {
@@ -428,6 +287,7 @@ class LibraryManager {
         } else if (item instanceof DVD) {
             dvdRepository.add((DVD) item);
         }
+        return true;
     }
 
     public List<LibraryItem> getAllItems() {
@@ -458,7 +318,7 @@ class LibraryManager {
     }
 }
 
-// ============== GUI (НЕ ЗМІНЮЙТЕ) ==============
+// ============== GUI ==============
 
 public class LibraryManagementApp extends JFrame {
     private LibraryManager manager;
@@ -474,21 +334,6 @@ public class LibraryManagementApp extends JFrame {
     }
 
     private void initializeTestData() {
-        // TODO 15: Додайте тестові дані
-        // Створіть мінімум 3 книги, 2 журнали, 2 DVD та додайте їх через manager.addItem()
-        //
-        // Приклад створення книги:
-        // Book book1 = new Book("B001", "Війна і мир", 1869, "Лев Толстой", 1225);
-        // manager.addItem(book1);
-        //
-        // Приклад створення журналу:
-        // Magazine mag1 = new Magazine("M001", "National Geographic", 2023, 145, "NG Society");
-        // manager.addItem(mag1);
-        //
-        // Приклад створення DVD:
-        // DVD dvd1 = new DVD("D001", "Матриця", 1999, "Вачовскі", 136);
-        // manager.addItem(dvd1);
-
         Book book1 = new Book("B001", "Війна і мир", 1869, "Лев Толстой", 1225);
         Book book2 = new Book("B002", "1984", 1949, "Джордж Орвелл", 328);
         Book book3 = new Book("B003", "Гаррі Поттер і філософський камінь", 1997, "Джоан Роулінг", 320);
@@ -514,7 +359,6 @@ public class LibraryManagementApp extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
-        // Верхня панель з пошуком та фільтрами
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         topPanel.add(new JLabel("Пошук:"));
         searchField = new JTextField(20);
@@ -532,7 +376,6 @@ public class LibraryManagementApp extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
 
-        // Таблиця
         String[] columns = {"ID", "Тип", "Назва", "Рік", "Додатково", "Статус", "Орендовано"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -548,7 +391,6 @@ public class LibraryManagementApp extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Нижня панель з кнопками
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         JButton rentBtn = new JButton("Орендувати");
         JButton returnBtn = new JButton("Повернути");
@@ -563,90 +405,6 @@ public class LibraryManagementApp extends JFrame {
         bottomPanel.add(statsBtn);
 
         add(bottomPanel, BorderLayout.SOUTH);
-
-        // TODO 16: Додайте обробники подій кнопок (використовуйте лямбда-вирази)
-        //
-        // Для кнопки searchBtn:
-        // searchBtn.addActionListener(e -> {
-        //     String query = searchField.getText().trim();
-        //     if (query.isEmpty()) {
-        //         refreshTable();
-        //     } else {
-        //         List<LibraryItem> results = manager.searchAll(query);
-        //         filterTable(results);
-        //     }
-        // });
-        //
-        // Для кнопки clearSearchBtn:
-        // clearSearchBtn.addActionListener(e -> {
-        //     searchField.setText("");
-        //     filterCombo.setSelectedIndex(0);
-        //     refreshTable();
-        // });
-        //
-        // Для кнопки rentBtn:
-        // rentBtn.addActionListener(e -> rentSelectedItem());
-        //
-        // Для кнопки returnBtn:
-        // returnBtn.addActionListener(e -> returnSelectedItem());
-        //
-        // Для кнопки refreshBtn:
-        // refreshBtn.addActionListener(e -> {
-        //     searchField.setText("");
-        //     filterCombo.setSelectedIndex(0);
-        //     refreshTable();
-        // });
-        //
-        // Для кнопки addBtn:
-        // addBtn.addActionListener(e -> showAddDialog());
-        //
-        // Для кнопки statsBtn:
-        // statsBtn.addActionListener(e -> showStatistics());
-        //
-        // Для поля searchField (щоб Enter працював як кнопка пошуку):
-        // searchField.addActionListener(e -> searchBtn.doClick());
-        //
-        // Для filterCombo (реалізуйте фільтрацію):
-        // filterCombo.addActionListener(e -> {
-        //     String selected = (String) filterCombo.getSelectedItem();
-        //     List<LibraryItem> filtered = manager.getAllItems();
-        //     List<LibraryItem> result = new ArrayList<>();
-        //
-        //     if (selected.equals("Книги")) {
-        //         for (LibraryItem item : filtered) {
-        //             if (item instanceof Book) {
-        //                 result.add(item);
-        //             }
-        //         }
-        //     } else if (selected.equals("Журнали")) {
-        //         for (LibraryItem item : filtered) {
-        //             if (item instanceof Magazine) {
-        //                 result.add(item);
-        //             }
-        //         }
-        //     } else if (selected.equals("DVD")) {
-        //         for (LibraryItem item : filtered) {
-        //             if (item instanceof DVD) {
-        //                 result.add(item);
-        //             }
-        //         }
-        //     } else if (selected.equals("Доступні")) {
-        //         for (LibraryItem item : filtered) {
-        //             if (item.isAvailable()) {
-        //                 result.add(item);
-        //             }
-        //         }
-        //     } else if (selected.equals("Орендовані")) {
-        //         for (LibraryItem item : filtered) {
-        //             if (!item.isAvailable()) {
-        //                 result.add(item);
-        //             }
-        //         }
-        //     } else {
-        //         result = filtered;
-        //     }
-        //     filterTable(result);
-        // });
 
         searchBtn.addActionListener(e -> {
             String query = searchField.getText().trim();
@@ -722,24 +480,11 @@ public class LibraryManagementApp extends JFrame {
         refreshTable();
     }
 
-
-    // TODO 17: Реалізуйте метод refreshTable()
-    // Цей метод оновлює таблицю всіма елементами
-    // Алгоритм:
-    // 1. Отримайте всі елементи: List<LibraryItem> items = manager.getAllItems();
-    // 2. Викличте метод filterTable(items);
     private void refreshTable() {
         List<LibraryItem> items = manager.getAllItems();
         filterTable(items);
     }
 
-    // TODO 18: Реалізуйте метод filterTable(List<LibraryItem> items)
-    // Цей метод відображає список елементів у таблиці
-    // Алгоритм:
-    // 1. Очистіть таблицю: tableModel.setRowCount(0);
-    // 2. Пройдіть по всіх елементах списку items (використайте цикл for)
-    // 3. Для кожного елемента викличте item.toTableRow() і додайте рядок до таблиці:
-    //    tableModel.addRow(item.toTableRow());
     private void filterTable(List<LibraryItem> items) {
         tableModel.setRowCount(0);
         for (LibraryItem item : items) {
@@ -747,27 +492,6 @@ public class LibraryManagementApp extends JFrame {
         }
     }
 
-    // TODO 19: Реалізуйте метод rentSelectedItem()
-    // Цей метод орендує вибраний елемент
-    // Алгоритм:
-    // 1. Отримайте номер вибраного рядка: int selectedRow = table.getSelectedRow();
-    // 2. Якщо selectedRow == -1 (нічого не вибрано):
-    //    - Покажіть повідомлення: JOptionPane.showMessageDialog(this, "Будь ласка, виберіть елемент для оренди", "Помилка", JOptionPane.WARNING_MESSAGE);
-    //    - Вийдіть з методу (return)
-    // 3. Отримайте ID елемента з таблиці: String id = (String) tableModel.getValueAt(selectedRow, 0);
-    // 4. Знайдіть елемент: LibraryItem item = manager.findById(id);
-    // 5. Якщо item == null:
-    //    - Покажіть повідомлення про помилку
-    //    - Вийдіть з методу
-    // 6. Якщо !item.isAvailable():
-    //    - Покажіть повідомлення: "Цей елемент вже орендовано користувачем: " + item.getRentedBy()
-    //    - Вийдіть з методу
-    // 7. Запитайте ім'я користувача:
-    //    String userName = JOptionPane.showInputDialog(this, "Введіть ім'я користувача:", "Оренда елемента", JOptionPane.QUESTION_MESSAGE);
-    // 8. Якщо userName != null і не порожній:
-    //    - Викличте item.rent(userName.trim())
-    //    - Якщо успішно, покажіть повідомлення "Елемент успішно орендовано!"
-    //    - Викличте refreshTable()
     private void rentSelectedItem() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) {
@@ -791,17 +515,11 @@ public class LibraryManagementApp extends JFrame {
         if (userName != null && !userName.trim().isEmpty()) {
             if (item.rent(userName.trim())) {
                 JOptionPane.showMessageDialog(this, "Елемент успішно орендовано!", "Успіх", JOptionPane.INFORMATION_MESSAGE);
-                refreshTable();
+                filterCombo.setSelectedItem(filterCombo.getSelectedItem());
             }
         }
     }
 
-    // TODO 20: Реалізуйте метод returnSelectedItem()
-    // Аналогічно rentSelectedItem(), але:
-    // - Перевіряйте, чи елемент орендований (item.isAvailable() == false)
-    // - Покажіть діалог підтвердження:
-    //   int confirm = JOptionPane.showConfirmDialog(this, "Повернути елемент, орендований користувачем: " + item.getRentedBy() + "?", "Підтвердження повернення", JOptionPane.YES_NO_OPTION);
-    // - Якщо confirm == JOptionPane.YES_OPTION, викличте item.returnItem()
     private void returnSelectedItem() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) {
@@ -829,12 +547,11 @@ public class LibraryManagementApp extends JFrame {
         if (confirm == JOptionPane.YES_OPTION) {
             if (item.returnItem()) {
                 JOptionPane.showMessageDialog(this, "Елемент успішно повернено!", "Успіх", JOptionPane.INFORMATION_MESSAGE);
-                refreshTable();
+                filterCombo.setSelectedItem(filterCombo.getSelectedItem());
             }
         }
     }
 
-    // НЕ ЗМІНЮЙТЕ (складний GUI код)
     private void showAddDialog() {
         String[] types = {"Книга", "Журнал", "DVD"};
         String selectedType = (String) JOptionPane.showInputDialog(this,
@@ -898,6 +615,10 @@ public class LibraryManagementApp extends JFrame {
                     throw new IllegalArgumentException("ID та назва обов'язкові");
                 }
 
+                if (manager.findById(id) != null) {
+                    throw new IllegalArgumentException("Елемент з ID '" + id + "' вже існує");
+                }
+
                 LibraryItem newItem = null;
 
                 switch (selectedType) {
@@ -919,7 +640,7 @@ public class LibraryManagementApp extends JFrame {
                 }
 
                 manager.addItem(newItem);
-                refreshTable();
+                filterCombo.setSelectedItem(filterCombo.getSelectedItem());
                 JOptionPane.showMessageDialog(this,
                         "Елемент успішно додано!",
                         "Успіх",
@@ -939,13 +660,10 @@ public class LibraryManagementApp extends JFrame {
         }
     }
 
-    // НЕ ЗМІНЮЙТЕ (складний код зі статистикою)
     private void showStatistics() {
         List<LibraryItem> allItems = manager.getAllItems();
-
         int totalCount = allItems.size();
 
-        // Підрахунок по типах
         int bookCount = 0, magazineCount = 0, dvdCount = 0;
         for (LibraryItem item : allItems) {
             if (item instanceof Book) bookCount++;
@@ -953,7 +671,6 @@ public class LibraryManagementApp extends JFrame {
             else if (item instanceof DVD) dvdCount++;
         }
 
-        // Підрахунок орендованих
         int rentedCount = 0;
         for (LibraryItem item : allItems) {
             if (!item.isAvailable()) rentedCount++;
@@ -961,7 +678,6 @@ public class LibraryManagementApp extends JFrame {
 
         double rentedPercentage = totalCount > 0 ? (rentedCount * 100.0 / totalCount) : 0;
 
-        // Найпопулярніший рік
         Map<Integer, Integer> yearFrequency = new HashMap<>();
         for (LibraryItem item : allItems) {
             int year = item.getYear();
